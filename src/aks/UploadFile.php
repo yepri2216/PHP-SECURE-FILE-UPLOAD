@@ -46,28 +46,28 @@ class UploadFile{
     
     public static function convertToBytes($bytes)
     {
-        // echo $bytes . "<br>";
+       
     $bytes = trim($bytes);
-       //  echo $bytes . "<br>";
+      
     $last = strtolower($bytes[strlen($bytes)-1]);
-        // echo $last . "<br>";
+        
     if(in_array($last,array('g','m','k')))
                     {
     switch($last)
             {
     case 'g' :
     $bytes *= 1024;
-            // echo 'g :'.$bytes . "<br>"; g bytes converts to m bytes
+           
     case 'm' :
-            // echo $bytes;
+           
     $bytes *= 1024;
-            // echo 'm :'.$bytes . "<br>"; //m bytes converts to k bytes
+           
     case 'k' :
     $bytes *= 1024;
-            // echo 'k :'.$bytes . "<br>"; m bytes
+           
             }
                     }
-        // echo $bytes . "<br>";
+       
     return $bytes;
     }
 
@@ -110,11 +110,33 @@ class UploadFile{
     The current() function does not increment or decrement the internal pointer after returning the value.
     In PHP, all arrays have an internal pointer. This internal pointer points to some element in that array which is called as the current element of the array.
     Usually, the current element is the first inserted element in the array.*/
-    if($this->checkFile($uploaded))
-    {
-         $this->moveFile($uploaded);
-    }
+        if(is_array($uploaded['name']))
+        {
+            foreach($uploaded['name'] as $key => $value)
+            {
+                $currentFile['name'] = $uploaded['name'][$key];
+                $currentFile['type'] = $uploaded['type'][$key];
+                $currentFile['tmp_name'] = $uploaded['tmp_name'][$key];
+                $currentFile['error'] = $uploaded['error'][$key];
+                $currentFile['size'] = $uploaded['size'][$key];
+                
+        if($this->checkFile($currentFile))
+        {
+             $this->moveFile($currentFile);
+        }
+            }
        
+            
+        }
+       else
+       {
+
+        if($this->checkFile($uploaded))
+        {
+             $this->moveFile($uploaded);
+        }
+
+       } 
     }
     
     protected function checkFile($uploaded)
