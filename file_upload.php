@@ -1,18 +1,26 @@
 <?php 
 use aks\UploadFile;
-$max = 200 * 1024; // 200kb , our max file size value when using setMaxSize() method ...
+session_start();
+require_once 'src/aks/UploadFile.php';
+if(!isset($_SESSION['maxfiles']))
+{
+    $_SESSION['maxfiles'] = ini_get('max_file_uploads');
+    $_SESSION['postmax'] = UploadFile::convertToBytes(ini_get('post_max_size'));
+    $_SESSION['displaymax'] = UploadFile::convertFromBytes($_SESSION['postmax'] );
+}
+$max = 500 * 1024; // 500kb , our maximum file size value when using setMaxSize() method ... for each file
 $message = array();
 if(isset($_POST['submit']))
 {    
-    require_once 'src/aks/UploadFile.php';
+    
     $destination = __DIR__ . '/uploaded/';
     
     try{
         $upload = new UploadFile($destination);
 
         $upload->setMaxSize($max); // set maximum file size that can be uploaded
-        //$upload->allowAllTypes();
-        $upload->upload();
+       // $upload->allowAllTypes(); // set allow all types to false or unused method. you can add suffix as a string argument..
+        $upload->upload(true); // renameDuplicate file is set to true , if u dont want to rename with suffix , u can set it to false..
         $message = $upload->getMessages();
     }
     catch(Exception $e)
@@ -20,43 +28,8 @@ if(isset($_POST['submit']))
         $message[] = $e->getMessage() . "<br>";
     }
     
-    
-//    echo __DIR__;
-   /* switch($_FILES["avatar"]["error"])
-    {
-        case 0 :
-            $result = move_uploaded_file($_FILES["avatar"]["tmp_name"],$destination . $_FILES["avatar"]["name"]);
-            if($result){
-            $message = $_FILES["avatar"]["name"] . ' was uploaded Sucessfully' . '<br>';
-            }
-            else{
-                $message = ' There was problem uploading the file' . $_FILES["avatar"]["name"] . '<br>' ; 
-            }
-            break;
-        case 2 :
-             $message = $_FILES["avatar"]["name"] . ' is too big to upload' . '<br>';
-             break;
-        case 4 :
-             $message = ' No files Selected' . '<br>';
-            break;
-        default :
-               $message = ' There was problem uploading the file' . $_FILES["avatar"]["name"] . '<br>' ;
-            break;
-    }*/
-//$file_name = $_FILES["avatar"]["name"];
-//echo "FILE NAME : ".$file_name . "<br>";
-//$file_type = $_FILES["avatar"]["type"];
-//echo "FILE TYPE : ".$file_type . "<br>";
-//$file_size = round($_FILES["avatar"]["size"]/1048576,2);
-//echo "FILE SIZE : ".$file_size . " MB<br>";
-//$file_dir = $_FILES["avatar"]["tmp_name"];
-//echo "FILE TEMPORARY DIRECTORY : ".$file_dir . "<br>";
-//$file_error = $_FILES["avatar"]["error"];
-//echo "FILE ERROR : ".$file_error . "<br>";
-//echo '<pre>';
-  //  print_r($_FILES);
-    //echo '</pre>';
 }
+$error = error_get_last();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -66,24 +39,34 @@ if(isset($_POST['submit']))
 </head>
 <body>
    <?php
-    if($message)
-    {
-    foreach($message as $error_code)
+    if($message || $error)
     {
         ?>
-        <ul>
-        <?php
+  <ul>  
+      
+  <?php 
+         if($error){
+  echo "<li>{$error['message']}</li>";
+  }
+        if($message)
+        {
+        foreach($message as $error_code)
+    {
         echo "<li>$error_code</li>";
     }
-    }
+        }
+    
     ?>
     </ul>
-    
+    <?php } ?>
     <label for="avatar">Choose a File To Upload</label>
-<form method="post" action="<?php echo $_SERVER["PHP_SELF"]; ?>" enctype="multipart/form-data">
-<input type="file"
-id="avatar" name="avatar"
- accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.png, .jpg, .jpeg,image/*"  multiple>
+        <form method="post" action="<?php echo $_SERVER["PHP_SELF"]; ?>" enctype="multipart/form-data">
+        <input type="file" id="avatar" name="avatar[]" 
+        data-maxfiles = "<?php echo $_SESSION['maxfiles'] ?>"
+        data-postmax = "<?php echo $_SESSION['postmax'] ?>"
+        data-displaymax = "<?php echo $_SESSION['displaymax'] ?>"
+        accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.png, .jpg, .jpeg,image/*" 
+        multiple>
        <input type="hidden" name="MAX_FILE_SIZE" value="<?php echo $max; ?>" >
        <input type="submit" name="submit" value="Upload">
     </form>
