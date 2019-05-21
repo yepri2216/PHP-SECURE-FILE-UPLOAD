@@ -6,7 +6,7 @@ class UploadFile{
     
    protected $destination;
    protected $message = array();  
-   protected $maxSize = 50 * 1024;     //default 50kb maxsize value... UploadFile Class member
+   protected $maxSize = 3096 * 1024;     //default 50kb maxsize value... UploadFile Class member
    protected $permitted_types = array(
      "image/jpeg","image/png","image/gif","image/pjpeg","image/webp"
      );  
@@ -166,31 +166,31 @@ class UploadFile{
         switch($uploaded["error"]) // same as $_FILES array but not superglobal.
     {
         case 2 :
-        $this->messages[] = $uploaded["name"] . ' is too big to upload MAX : ' . self::covertFromBytes($this->maxSize).'<br>'; // exceeds limit of file upload , so it cannit be uploaded...
+        $this->messages[] = "<span style='color:red;'>" . $uploaded["name"] . " is too big to upload MAX : " . self::covertFromBytes($this->maxSize)."</span><br>"; // exceeds limit of file upload , so it cannit be uploaded...
              break;
         case 3 :
-        $this->messages[] = $uploaded["name"] . ' is partially uploaded' . '<br>';
+        $this->messages[] = "<span style='color:red;'>" . $uploaded["name"] . " is partially uploaded" . "</span><br>";
             break;
         case 4 :
-        $this->messages[] = ' No files Selected' . '<br>';
+        $this->messages[] = "<span style='color:red;'> No files Selected </span> <br>";
             break;
         default :
-        $this->messages[] = ' There was problem uploading the file' . $uploaded['name'] . '<br>' ;
+        $this->messages[] = "<span style='color:red;'> There was problem uploading the file" . $uploaded['name'] . "</span><br>" ;
             break;
     }
         
     }
     
     protected function checkSize($uploaded)
-    {
+    { 
         if($uploaded['size'] == 0)
         {
-            $this->messages[] = $uploaded["name"] . ' is empty' . '<br>';
+            $this->messages[] =  "<span style='color:red;'>" . $uploaded["name"] . " is empty </span>" . "<br>";
             return false;
         }
         elseif($uploaded['size'] > $this->maxSize)
         {
-            $this->messages[] = $uploaded["name"] . ' is too big , limit exceeds '. self::convertFromBytes($this->maxSize) . '<br>';
+            $this->messages[] = "<span style='color:red;'>" . $uploaded["name"] . " is too big , limit exceeds ". self::convertFromBytes($this->maxSize) . "</span><br>";
             return false;
         }
         else
@@ -207,7 +207,7 @@ class UploadFile{
         }
         else
         {
-            $this->messages[] = $uploaded['name'] . " is not a permitted file type to upload ..";
+            $this->messages[] =  "<span style='color:red;'>" . $uploaded['name'] . " is not a permitted file type to upload ..</span>";
             return false;
         }
     }
@@ -264,18 +264,18 @@ class UploadFile{
         $success = move_uploaded_file($uploaded['tmp_name'],$this->destination . $filename );
         if($success)
         {
-        $result = $uploaded["name"] . ' was uploaded Sucessfully' . '<br>';
+        $result = "<span style='color:green;'>". $uploaded["name"] . "</span> was uploaded Sucessfully " ;
         if($this->new_file_name != null)
         {
-            $result .= ' and was renamed ' . $this->new_file_name; 
+            $result .= " and was renamed " . "<span style='color:blue;'>" . $this->new_file_name . "</span>"; 
         }
-        $result .= '.';
+        $result .= ".<br>";
         
         $this->messages[] = $result;
         }
         else
         {
-            $this->messages[] = 'Could not Upload' . $uploaded['name'];
+            $this->messages[] = "<span style='color:red;'>" . "Could not Upload" . $uploaded['name'] . "</span>";
         }
     }
     
