@@ -67,9 +67,7 @@ $error = error_get_last();
       
     </script>
     <style>
-        #drop_files{
-            cursor: url(cursor.png), auto;
-        }
+        
     </style>
 </head>
 <body>
